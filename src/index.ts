@@ -30,7 +30,7 @@ export default class Wrapper {
     }
 
     async dayOfMostViews(articleId:string):Promise<string> {
-        // get clarity on "day of the month" and how to format the date that's being returned
+        // get clarity on "day of the month" and how to format the date that's being returned. Timezones?
         return 'day';
     }
 
