@@ -5,9 +5,10 @@ export default class DateUtils {
         const startDate = this.turnWikiDateIntoLuxonDateTime(startingDate);
         let endingDate = '';
         if (duration === 'week') {
-            endingDate = startDate.plus({ weeks: 1 }).toFormat('yyyyMMdd');
+            endingDate = startDate.plus({ days: 6 }).toFormat('yyyyMMdd');
         } else if (duration === 'month') {
-            endingDate = startDate.plus({ months: 1 }).toFormat('yyyyMMdd');
+            endingDate = startDate.plus({ months: 1 }).minus({ days: 1 })
+                .toFormat('yyyyMMdd');
         } else {
             throw new Error(`Error: you entered ${duration} for duration. Please change it to either the string 'month' or the string 'day'`);
         }
