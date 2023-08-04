@@ -1,18 +1,14 @@
 import axios from 'axios';
-import { DateTime } from 'luxon';
+//import { DateTime } from 'luxon';
 import DateUtils from './DateUtils';
 const dateUtils = new DateUtils();
-//import {calculateEndingDate} from 'DateUtils.js';
 
 export type ArticleData = {
     timestamp: string;
     views: number;
 }
 export default class Wrapper {
-    // constructor() {
-    //decide whether user will want to pass in duration and articleId once for all 3 functions, or if they should be passed separately each time
-    // }
-    async mostViewedArticle(duration:string, startdate: string): Promise<string[]> {
+    async mostViewedArticle(duration:string, startingdate: string): Promise<string[]> {
         const mostViewed = [''];
         // if (duration === 'month') {
         //maybe use the monthly and do only one month???
@@ -38,38 +34,34 @@ export default class Wrapper {
         return sum;
     }
 
-    async dayOfMostViews(articleId:string):Promise<Array<string>> {
-        const url = `https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/de.wikipedia/all-access/user/${articleId}/daily/2015101300/2015102700`;
+    async dayOfMostViews(startingDate:string, articleId:string):Promise<Array<string>> {
+        const endingDate = dateUtils.calculateEndingDate('month', startingDate);
+        const url = `https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/de.wikipedia/all-access/user/${articleId}/daily/${startingDate}/${endingDate}`;
         const response = await axios.get(url);
 
         const arrayOfTimestamps: Array<string> = [];
-        const currentHighest = { timestamp: arrayOfTimestamps, views: 0 };
+        const currentHighest = { dates: arrayOfTimestamps, views: 0 };
         const arrayOfArticleData = response.data.items.map(this.getArticleData);
-        console.log(currentHighest, arrayOfArticleData);
 
         arrayOfArticleData.forEach((articleData: ArticleData) => {
             if (articleData.views > currentHighest.views) {
-                while (currentHighest.timestamp.length > 0) {
-                    currentHighest.timestamp.pop();
+                while (currentHighest.dates.length > 0) {
+                    currentHighest.dates.pop();
                 }
-                currentHighest.timestamp[0] = articleData.timestamp;
+                currentHighest.dates[0] = articleData.timestamp;
                 currentHighest.views = articleData.views;
             } else if (articleData.views === currentHighest.views) {
-                currentHighest.timestamp.push(articleData.timestamp);
+                currentHighest.dates.push(articleData.timestamp);
             }
         });
-        //console.log(startDate.toFormat('MMMM dd, yyyy'));
+        const formattedDates = currentHighest.dates.map(date => {
+            const slicedDate = date.slice(0, 8);
+            const luxonDate = dateUtils.turnWikiDateIntoLuxonDateTime(slicedDate);
 
-        return currentHighest.timestamp;
+            return luxonDate.toFormat('MMMM dd, yyyy');
+        });
 
-        //loop through response
-        // for each, if views > currentHighest.views, replace info
-        //if views === then add to the object
-
-        // At then end, make sure to return as many as are in the object
-
-        // get clarity on "day of the month" and how to format the date that's being returned. Timezones?
-        //return 'day';
+        return formattedDates;
     }
 
     private getArticleViewCount(article:any):number {
