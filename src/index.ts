@@ -1,4 +1,8 @@
 import axios from 'axios';
+import { DateTime } from 'luxon';
+import DateUtils from './DateUtils';
+const dateUtils = new DateUtils();
+//import {calculateEndingDate} from 'DateUtils.js';
 
 export type ArticleData = {
     timestamp: string;
@@ -8,23 +12,24 @@ export default class Wrapper {
     // constructor() {
     //decide whether user will want to pass in duration and articleId once for all 3 functions, or if they should be passed separately each time
     // }
-    async mostViewedArticle(duration:string): Promise<string[]> {
+    async mostViewedArticle(duration:string, startdate: string): Promise<string[]> {
         const mostViewed = [''];
         // if (duration === 'month') {
+        //maybe use the monthly and do only one month???
         //     console.log('m');
         // } else if (duration === 'week') {
         //     console.log('m');
         // }
+        const baseUrl = 'https://wikimedia.org/api/rest_v1/metrics/pageviews/top/en.wikipedia/all-access/';
+        const response = await axios.get(baseUrl + '2023/01/01');
+        // console.log(response.data);
 
         return mostViewed;
     }
-    async articleViewCount(duration:string, articleId:string): Promise<number> {
-        // TODO: USE DATES
-        // TODO: document how to get the articleId for passing in
-        const url = `https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/de.wikipedia/all-access/user/${articleId}/daily/2015101300/2015102700`;
-
+    async articleViewCount(duration:string, startingDate:string, articleId:string): Promise<number> {
+        const endingDate = dateUtils.calculateEndingDate(duration, startingDate);
+        const url = `https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/all-agents/${articleId}/daily/${startingDate}/${endingDate}`;
         const response = await axios.get(url);
-        console.log(response.data);
         const arrayOfViews = response.data.items.map(this.getArticleViewCount);
         const sum:number = arrayOfViews.reduce((total:number, current:number) => {
             return total + current;
@@ -53,6 +58,7 @@ export default class Wrapper {
                 currentHighest.timestamp.push(articleData.timestamp);
             }
         });
+        //console.log(startDate.toFormat('MMMM dd, yyyy'));
 
         return currentHighest.timestamp;
 
@@ -66,11 +72,11 @@ export default class Wrapper {
         //return 'day';
     }
 
-    getArticleViewCount(article:any):number {
+    private getArticleViewCount(article:any):number {
         return article.views;
     }
 
-    getArticleData(article:any): ArticleData {
+    private getArticleData(article:any): ArticleData {
         return { timestamp: article.timestamp, views: article.views };
     }
 }

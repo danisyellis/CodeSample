@@ -2,13 +2,18 @@ import Wrapper from '.';
 
 const wrap = new Wrapper();
 
-// async function exampleOfGettingArticleViewCount() {
-//     console.log(await wrap.articleViewCount('day', 'Johann_Wolfgang_von_Goethe'));
+// async function exampleOfGettingMostViewed() {
+//     console.log(await wrap.mostViewedArticle('day', 'hi'));
 // }
 
-async function exampleOfGettingDay() {
-    console.log(await wrap.dayOfMostViews('Johann_Wolfgang_von_Goethe'));
+async function exampleOfGettingArticleViewCount() {
+    console.log(await wrap.articleViewCount('week', '20230701', 'Pinball'));
 }
 
-//exampleOfGettingArticleViewCount();
-exampleOfGettingDay();
+// async function exampleOfGettingDay() {
+//     console.log(await wrap.dayOfMostViews('Johann_Wolfgang_von_Goethe'));
+// }
+
+//exampleOfGettingMostViewed();
+exampleOfGettingArticleViewCount();
+//exampleOfGettingDay();
