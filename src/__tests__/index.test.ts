@@ -31,23 +31,24 @@ class mockWrapperForMultipleHighestViewDays extends Wrapper {
     }
 }
 
-describe('articleViewCount can get the number of views for a specific article over a period of time', () => {
+describe('getViewCount()', () => {
     it('can get the correct number of views for an article over the course of a week', async () => {
         const fakeWrapper = new mockWrapper();
-        const fakeResult = await fakeWrapper.articleViewCount('week', '2015101700', 'fakeArticle');
+        const fakeResult = await fakeWrapper.getViewCount('2015101700', 'week', 'fakeArticle');
         expect(fakeResult).toBe(17820);
     });
+    //placeholder for test for month - would probably programmatically create the mockedAPIResults for something that large
 });
 
-describe('getting the day that an article had the most views', () => {
-    it('should return the date with the highest number of views', async () => {
+describe('getDayOfMostViews()', () => {
+    it('should return the date that an article had the highest number of views', async () => {
         const fakeWrapper = new mockWrapper();
-        const fakeResult = await fakeWrapper.dayOfMostViews('2015101700', 'fakeArticle');
+        const fakeResult = await fakeWrapper.getDayOfMostViews('2015101700', 'fakeArticle');
         expect(JSON.stringify(fakeResult)).toBe(JSON.stringify(['October 19, 2015']));
     });
     it('should return multiple dates if more than one day has the highest number of views', async () => {
         const fakeWrapper = new mockWrapperForMultipleHighestViewDays();
-        const fakeResult = await fakeWrapper.dayOfMostViews('2015101700', 'fakeArticle');
+        const fakeResult = await fakeWrapper.getDayOfMostViews('2015101700', 'fakeArticle');
         expect(JSON.stringify(fakeResult)).toBe(JSON.stringify(['October 19, 2015', 'October 22, 2015']));
     });
 });

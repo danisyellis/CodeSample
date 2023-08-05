@@ -7,7 +7,7 @@ export type ArticleData = {
     views: number;
 }
 export default class Wrapper {
-    async mostViewedArticles(duration:string, startingdate:string) {
+    async getListOfMostViewed(startingdate:string, duration:string) {
         const baseUrl = 'https://wikimedia.org/api/rest_v1/metrics/pageviews/top/en.wikipedia/all-access/';
 
         if (duration === 'month') {
@@ -22,7 +22,7 @@ export default class Wrapper {
         }
     }
 
-    async articleViewCount(duration:string, startingDate:string, articleId:string): Promise<number> {
+    async getViewCount(startingDate:string, duration:string, articleId:string): Promise<number> {
         const endingDate = dateUtils.calculateEndingDate(duration, startingDate);
         const url = `https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/all-agents/${articleId}/daily/${startingDate}/${endingDate}`;
         try {
@@ -45,7 +45,7 @@ export default class Wrapper {
         }
     }
 
-    async dayOfMostViews(startingDate:string, articleId:string):Promise<Array<string>> {
+    async getDayOfMostViews(startingDate:string, articleId:string):Promise<Array<string>> {
         const endingDate = dateUtils.calculateEndingDate('month', startingDate);
         const url = `https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/de.wikipedia/all-access/user/${articleId}/daily/${startingDate}/${endingDate}`;
         let response;
@@ -88,14 +88,6 @@ export default class Wrapper {
         return formattedDates;
     }
 
-    private getArticleViewCount(article:any):number {
-        return article.views;
-    }
-
-    private getArticleData(article:any): ArticleData {
-        return { timestamp: article.timestamp, views: article.views };
-    }
-
     private async getMostViewedForMonth(url:string) {
         try {
             const response = await this.getFromWikipediaAPI(url);
@@ -116,28 +108,34 @@ export default class Wrapper {
     private async getMostViewedForWeek(baseUrl: string, startingDate:string) {
         const viewTotals = new Map<string, number>();
         const startingDateAsDateTime = dateUtils.turnWikiDateIntoLuxonDateTime(startingDate);
+
         for (let i = 0; i < 7; i++) {
             const dateI = startingDateAsDateTime.plus({ days: i }).toFormat('yyyy/MM/dd');
             const url = baseUrl + dateI;
             const response = await axios.get(url);
             response.data.items[0].articles.forEach((a: any) => {
                 if (viewTotals.has(a.article)) {
-                    const currentViewsTotal = viewTotals.get(a.article);
-                    viewTotals.set(a.article, currentViewsTotal + a.views);
+                    const previousTotal = viewTotals.get(a.article);
+                    viewTotals.set(a.article, previousTotal + a.views);
                 } else {
                     viewTotals.set(a.article, a.views);
                 }
             });
         }
-
         const sortedArrayOfTotals = Array.from(viewTotals).sort((a, b) => b[1] - a[1]);
 
         return sortedArrayOfTotals;
     }
 
-    protected async getFromWikipediaAPI(url: string):Promise<any> {
-        const response = await axios.get(url);
+    private getArticleViewCount(article:any):number {
+        return article.views;
+    }
 
-        return response;
+    private getArticleData(article:any): ArticleData {
+        return { timestamp: article.timestamp, views: article.views };
+    }
+
+    protected async getFromWikipediaAPI(url: string):Promise<any> {
+        return await axios.get(url);
     }
 }

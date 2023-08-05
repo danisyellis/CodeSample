@@ -20,7 +20,6 @@ export default class DateUtils {
         } else {
             throw new Error(`Error: you entered ${duration} for duration. Please change it to either the string 'month' or the string 'day'`);
         }
-        //console.log(`END: ${endingDate}`);
 
         return endingDate;
     }
