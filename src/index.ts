@@ -1,5 +1,4 @@
 import axios from 'axios';
-//import { DateTime } from 'luxon';
 import DateUtils from './DateUtils';
 const dateUtils = new DateUtils();
 
@@ -8,20 +7,21 @@ export type ArticleData = {
     views: number;
 }
 export default class Wrapper {
-    async mostViewedArticle(duration:string, startingdate: string): Promise<string[]> {
-        const mostViewed = [''];
-        // if (duration === 'month') {
-        //maybe use the monthly and do only one month???
-        //     console.log('m');
-        // } else if (duration === 'week') {
-        //     console.log('m');
-        // }
+    async mostViewedArticle(duration:string, startingdate:string) {
         const baseUrl = 'https://wikimedia.org/api/rest_v1/metrics/pageviews/top/en.wikipedia/all-access/';
-        const response = await axios.get(baseUrl + '2023/01/01');
-        // console.log(response.data);
 
-        return mostViewed;
+        if (duration === 'month') {
+            const monthToQuery = dateUtils.formatMonthForMostViewed(startingdate);
+            const url = baseUrl + monthToQuery;
+
+            return this.getMostViewedForMonth(url);
+        } else if (duration === 'week') {
+            return this.getMostViewedForWeek(baseUrl, startingdate);
+        } else {
+            throw new Error(`Error: you entered ${duration} for duration. Please change it to either the string 'month' or the string 'day'`);
+        }
     }
+
     async articleViewCount(duration:string, startingDate:string, articleId:string): Promise<number> {
         const endingDate = dateUtils.calculateEndingDate(duration, startingDate);
         const url = `https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/all-agents/${articleId}/daily/${startingDate}/${endingDate}`;
@@ -70,5 +70,33 @@ export default class Wrapper {
 
     private getArticleData(article:any): ArticleData {
         return { timestamp: article.timestamp, views: article.views };
+    }
+
+    private async getMostViewedForMonth(url:string) {
+        const response = await axios.get(url);
+
+        return response.data.items[0].articles;
+    }
+
+    private async getMostViewedForWeek(baseUrl: string, startingDate:string) {
+        const viewTotals = new Map<string, number>();
+        const startingDateAsDateTime = dateUtils.turnWikiDateIntoLuxonDateTime(startingDate);
+        for (let i = 0; i < 7; i++) {
+            const dateI = startingDateAsDateTime.plus({ days: i }).toFormat('yyyy/MM/dd');
+            const url = baseUrl + dateI;
+            const response = await axios.get(url);
+            response.data.items[0].articles.forEach((a: any) => {
+                if (viewTotals.has(a.article)) {
+                    const currentViewsTotal = viewTotals.get(a.article);
+                    viewTotals.set(a.article, currentViewsTotal + a.views);
+                } else {
+                    viewTotals.set(a.article, a.views);
+                }
+            });
+        }
+
+        const sortedArrayOfTotals = Array.from(viewTotals).sort((a, b) => b[1] - a[1]);
+
+        return sortedArrayOfTotals;
     }
 }
