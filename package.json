@@ -7,7 +7,7 @@
     "start": "node build/index.js",
     "build": "npx tsc",
     "lint": "eslint . --ext .ts",
-    "test": "jest"
+    "test": "jest --verbose"
   },
   "keywords": [],
   "author": "",
