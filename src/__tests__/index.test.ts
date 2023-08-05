@@ -1,9 +1,6 @@
 import Wrapper from '..';
 
-const testWrap = new Wrapper();
-
-// for testing - regex of the url or a number that was passed in or something
-const mockedAPIResults = [
+const mockedAPIResults = { data: { items: [
     { timestamp: '2015101700', views: 2305 },
     { timestamp: '2015101800', views: 2739 },
     { timestamp: '2015101900', views: 3344 },
@@ -11,9 +8,14 @@ const mockedAPIResults = [
     { timestamp: '2015102100', views: 3048 },
     { timestamp: '2015102200', views: 1001 },
     { timestamp: '2015102300', views: 2315 },
-]; //(to be returned by a mocked out getArticleData)
+] } };
+class mockWrapper extends Wrapper {
+    public async getFromWikipediaAPI() {
+        return mockedAPIResults;
+    }
+}
 
-const mockedAPIResultsWith2HighestDays = [
+const mockedAPIResultsWith2HighestDays = { data: { items: [
     { timestamp: '2015101700', views: 2305 },
     { timestamp: '2015101800', views: 2739 },
     { timestamp: '2015101900', views: 3344 },
@@ -21,18 +23,39 @@ const mockedAPIResultsWith2HighestDays = [
     { timestamp: '2015102100', views: 3048 },
     { timestamp: '2015102200', views: 3344 },
     { timestamp: '2015102300', views: 2315 },
-];
+] } };
 
-test('naive articleViewCount implementation', async () => {
-    const result = await testWrap.articleViewCount('day', 'Johann_Wolfgang_von_Goethe');
-    expect(result).toBe(42622);
+class mockWrapperForMultipleHighestViewDays extends Wrapper {
+    public async getFromWikipediaAPI() {
+        return mockedAPIResultsWith2HighestDays;
+    }
+}
+
+describe('articleViewCount can get the number of views for a specific article over a period of time', () => {
+    it('can get the correct number of views for an article over the course of a week', async () => {
+        const fakeWrapper = new mockWrapper();
+        const fakeResult = await fakeWrapper.articleViewCount('week', '2015101700', 'fakeArticle');
+        expect(fakeResult).toBe(17820);
+    });
 });
 
 describe('getting the day that an article had the most views', () => {
     it('should return the date with the highest number of views', async () => {
-        const result = await testWrap.dayOfMostViews('Johann_Wolfgang_von_Goethe');
-        expect(result).toBe(['2015101900']);
+        const fakeWrapper = new mockWrapper();
+        const fakeResult = await fakeWrapper.dayOfMostViews('2015101700', 'fakeArticle');
+        expect(JSON.stringify(fakeResult)).toBe(JSON.stringify(['October 19, 2015']));
+    });
+    it('should return multiple dates if more than one day has the highest number of views', async () => {
+        const fakeWrapper = new mockWrapperForMultipleHighestViewDays();
+        const fakeResult = await fakeWrapper.dayOfMostViews('2015101700', 'fakeArticle');
+        expect(JSON.stringify(fakeResult)).toBe(JSON.stringify(['October 19, 2015', 'October 22, 2015']));
     });
 });
-// test the date if just one has the highest views
-// test the date if multiple have the highest
+
+//Placeholder for tests I didn't write for mostViewedArticle
+
+// describe('', () => {
+//     it('', () => {
+//         expect().toBe();
+//     });
+// });

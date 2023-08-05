@@ -7,7 +7,7 @@ export type ArticleData = {
     views: number;
 }
 export default class Wrapper {
-    async mostViewedArticle(duration:string, startingdate:string) {
+    async mostViewedArticles(duration:string, startingdate:string) {
         const baseUrl = 'https://wikimedia.org/api/rest_v1/metrics/pageviews/top/en.wikipedia/all-access/';
 
         if (duration === 'month') {
@@ -48,7 +48,20 @@ export default class Wrapper {
     async dayOfMostViews(startingDate:string, articleId:string):Promise<Array<string>> {
         const endingDate = dateUtils.calculateEndingDate('month', startingDate);
         const url = `https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/de.wikipedia/all-access/user/${articleId}/daily/${startingDate}/${endingDate}`;
-        const response = await axios.get(url);
+        let response;
+
+        try {
+            response = await this.getFromWikipediaAPI(url);
+        } catch (e: unknown) {
+            console.error(`error getting data from this url: ${url}`);
+            if (e instanceof Error) {
+                const err = e as Error;
+                console.error(err.message);
+            } else {
+                console.error(`Caught something other than an Error: ${JSON.stringify(e)}`);
+            }
+            throw e;
+        }
 
         const arrayOfTimestamps: Array<string> = [];
         const currentHighest = { dates: arrayOfTimestamps, views: 0 };
@@ -84,9 +97,20 @@ export default class Wrapper {
     }
 
     private async getMostViewedForMonth(url:string) {
-        const response = await axios.get(url);
+        try {
+            const response = await this.getFromWikipediaAPI(url);
 
-        return response.data.items[0].articles;
+            return response.data.items[0].articles;
+        } catch (e: unknown) {
+            console.error(`error getting data from this url: ${url}`);
+            if (e instanceof Error) {
+                const err = e as Error;
+                console.error(err.message);
+            } else {
+                console.error(`Caught something other than an Error: ${JSON.stringify(e)}`);
+            }
+            throw e;
+        }
     }
 
     private async getMostViewedForWeek(baseUrl: string, startingDate:string) {
@@ -111,7 +135,7 @@ export default class Wrapper {
         return sortedArrayOfTotals;
     }
 
-    protected async getFromWikipediaAPI(url: string) {
+    protected async getFromWikipediaAPI(url: string):Promise<any> {
         const response = await axios.get(url);
 
         return response;
