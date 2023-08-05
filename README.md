@@ -1,14 +1,15 @@
 # Wikipedia API Wrapper
 
-## Instructions for running an example that calls each of the 3 endpoints:
-This was written using npm 18, so it's recommended that you also use that
-`git clone` this repo
-`cd` into the new directory
-run `npm install`
-run `npm run build`
-run `node src/exampleRunner.ts`
+## *Instructions for running an example that calls each of the 3 endpoints:
+(This was written using npm 18, so it's recommended that you also use that)
 
-## Instructions for using the API yourself:
+> - `git clone` this repo
+> - `cd` into the new directory
+> - run `npm install`
+> - run `npm run build`
+> - run `node src/exampleRunner.ts`
+
+## *Instructions for using the API yourself:
 The first step is to import the Wrapper class and create an instance of it - `const myWrapper = new Wrapper()`
 
 There are 3 endpoints.
@@ -17,16 +18,16 @@ Each endpoint will use all or some of these 3 arguments:
 - `duration` This should be either the string 'month' or the string 'week'
 - `articleId` To get the ID of the article you're interested in, you can go to wikipedia.org, search for the topic you're interested in, and grab the string used to identify the article in the url. For example, if the url is 'https://en.wikipedia.org/wiki/List_of_butterflies_of_the_Iberian_Peninsula', then `articleId = List_of_butterflies_of_the_Iberian_Peninsula`
 
+#### The 3 Endpoints Are:
 1. getListOfMostViewed
 `getListOfMostViewed` will give you a list of the most viewed articles for a week or a month.
-It takes 2 arguments `getListOfMostViewed(startingDate:string, duration:string)`.
+It takes 2 arguments. `getListOfMostViewed(startingDate:string, duration:string)`.
 
-2. getViewCount
+3. getViewCount
 You can use `getViewCount` to get the number of views for a specific article over a period of time. You can choose to get the views for either a week or a month.
-getViewCount takes all 3 arguments.
-`getViewCount(startingDate:string, duration:string articleId:string)` 
+getViewCount takes all 3 arguments. `getViewCount(startingDate:string, duration:string articleId:string)` 
 
-3. getDayOfMostViews
+4. getDayOfMostViews
 You can use `getDayOfMostViews` to retrieve the day of the month where an article got the most page views
 getDayOfMostViews takes 2 arguments `getDayOfMostViews(startingDate:string, articleId:string)`
 NOTE: This call will return an array. If the highest number of views (say 500 views) happened on more than one day that month, the API will return all of those days.
