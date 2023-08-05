@@ -11,7 +11,7 @@ The first step is to import the Wrapper class and create an instance of it - `co
 There are 3 endpoints.
 Each endpoint will use all or some of these 3 arguments:
 - `duration` which should be either the string 'month' or the string 'week'
-- `startingDate` which is the first date you are interested in. At this time, if you want a calendar week or month, you should use the first date of that week or month as your startingDate. This API will simply add 1 week or 1 month to the date you give it.
+- `startingDate` which is the first date you are interested in. At this time, if you want a calendar week or month, you should use the first date of that week or month as your startingDate. This API will simply add 1 week or 1 month to the date you give it. The date should be in the format yyyyMMdd (20230804, for example).
 - `articleId` To get the ID of the article you're interested in, you can go to wikipedia.org, search for the topic you're interested in, and grab the string used to identify the article in the url. For example, if the url is 'https://en.wikipedia.org/wiki/List_of_butterflies_of_the_Iberian_Peninsula', then `articleId = List_of_butterflies_of_the_Iberian_Peninsula`
 
 1. mostViewedArticle

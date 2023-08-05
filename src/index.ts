@@ -25,13 +25,24 @@ export default class Wrapper {
     async articleViewCount(duration:string, startingDate:string, articleId:string): Promise<number> {
         const endingDate = dateUtils.calculateEndingDate(duration, startingDate);
         const url = `https://wikimedia.org/api/rest_v1/metrics/pageviews/per-article/en.wikipedia/all-access/all-agents/${articleId}/daily/${startingDate}/${endingDate}`;
-        const response = await axios.get(url);
-        const arrayOfViews = response.data.items.map(this.getArticleViewCount);
-        const sum:number = arrayOfViews.reduce((total:number, current:number) => {
-            return total + current;
-        });
+        try {
+            const response = await this.getFromWikipediaAPI(url);
+            const arrayOfViews = response.data.items.map(this.getArticleViewCount);
+            const sum:number = arrayOfViews.reduce((total:number, current:number) => {
+                return total + current;
+            });
 
-        return sum;
+            return sum;
+        } catch (e: unknown) {
+            console.error(`error getting data from this url: ${url}`);
+            if (e instanceof Error) {
+                const err = e as Error;
+                console.error(err.message);
+            } else {
+                console.error(`Caught something other than an Error: ${JSON.stringify(e)}`);
+            }
+            throw e;
+        }
     }
 
     async dayOfMostViews(startingDate:string, articleId:string):Promise<Array<string>> {
@@ -98,5 +109,11 @@ export default class Wrapper {
         const sortedArrayOfTotals = Array.from(viewTotals).sort((a, b) => b[1] - a[1]);
 
         return sortedArrayOfTotals;
+    }
+
+    protected async getFromWikipediaAPI(url: string) {
+        const response = await axios.get(url);
+
+        return response;
     }
 }
